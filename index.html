@@ -360,7 +360,7 @@
                 bubble.textContent = msg.texto;
                 const meta = document.createElement('div');
                 meta.className = 'message-meta';
-                meta.textContent = msg.tipo === 'humano' ? '👤' : '🤖';
+                meta.textContent = msg.tipo === 'humano' ? 'usuario' : 'bot';
                 row.appendChild(bubble);
                 row.appendChild(meta);
                 messagesArea.appendChild(row);
