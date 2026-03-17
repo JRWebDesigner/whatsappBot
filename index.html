@@ -3,41 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Bot - Tiempo real</title>
+    <title>Chat Intercalado - Kiss</title>
     <style>
+        /* Mismos estilos que antes, añadimos estilo para el botón de soporte */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
         body { background: #0b141a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
         .app-container { width: 100%; max-width: 1200px; height: 90vh; background: #0b141a; border-radius: 30px; display: flex; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid #2a3942; }
         .chat-list { width: 35%; background: #111b21; border-right: 1px solid #2a3942; display: flex; flex-direction: column; }
-        .chat-list-header { padding: 16px; background: #202c33; color: white; font-weight: 500; border-bottom: 1px solid #2a3942; display: flex; align-items: center; gap: 8px; }
+        .chat-list-header { padding: 20px 16px; background: #202c33; color: white; font-weight: 500; border-bottom: 1px solid #2a3942; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .chat-list-header input { flex: 1; padding: 8px 12px; border-radius: 20px; border: none; background: #2a3942; color: white; outline: none; }
-        .chat-list-header input::placeholder { color: #8696a0; }
-        .config-btn { background: none; border: none; color: #00a884; font-size: 24px; cursor: pointer; padding: 0 4px; }
+        .config-btn { background: none; border: none; color: #00a884; font-size: 20px; cursor: pointer; padding: 4px 8px; }
         .chat-list-items { flex: 1; overflow-y: auto; }
         .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #2a3942; cursor: pointer; transition: background 0.2s; }
         .chat-item:hover { background: #202c33; }
         .chat-item.selected { background: #2a3942; }
         .chat-avatar { width: 45px; height: 45px; border-radius: 50%; background: #00a884; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; text-transform: uppercase; }
         .chat-info { flex: 1; min-width: 0; }
-        .chat-name { color: white; font-weight: 500; margin-bottom: 4px; }
+        .chat-name { color: white; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .soporte-badge { background: #f0b400; color: #000; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: normal; }
         .chat-last-msg { color: #8696a0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .chat-time { color: #8696a0; font-size: 11px; }
         .chat-window { width: 65%; display: flex; flex-direction: column; background: #0b141a; }
         .chat-header { background: #202c33; color: white; padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2a3942; }
         .back-button { display: none; background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin-right: 8px; }
         .header-avatar { width: 40px; height: 40px; border-radius: 50%; background: #00a884; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: white; }
-        .header-info h2 { font-size: 16px; font-weight: 500; }
+        .header-info h2 { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .header-info p { font-size: 12px; color: #8696a0; }
         .messages-area { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 4px; background: #0b141a; }
         .message-row { display: flex; flex-direction: column; }
-        .message-bubble { max-width: 80%; padding: 8px 12px; border-radius: 18px; font-size: 14px; line-height: 1.5; word-wrap: break-word; margin-bottom: 2px; }
+        .message-bubble { max-width: 80%; padding: 8px 12px; border-radius: 18px; font-size: 14px; line-height: 1.5; word-wrap: break-word; position: relative; margin-bottom: 2px; }
         .incoming { align-self: flex-start; background: #202c33; color: #e9edef; border-top-left-radius: 4px; }
         .outgoing { align-self: flex-end; background: #005c4b; color: #e9edef; border-top-right-radius: 4px; }
         .message-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8696a0; margin-top: 2px; margin-bottom: 8px; }
         .incoming + .message-meta { justify-content: flex-start; margin-left: 12px; }
         .outgoing + .message-meta { justify-content: flex-end; margin-right: 12px; }
-        .separator { text-align: center; margin: 16px 0; color: #8696a0; font-size: 12px; }
-        .separator span { background: #182229; padding: 4px 12px; border-radius: 20px; }
+        .separator { text-align: center; margin: 16px 0; color: #8696a0; font-size: 12px; position: relative; }
+        .separator span { background: #182229; padding: 4px 12px; border-radius: 20px; display: inline-block; }
         .loading { color: #8696a0; text-align: center; padding: 20px; }
         .message-input-area { background: #202c33; padding: 12px 16px; display: flex; gap: 8px; border-top: 1px solid #2a3942; }
         .message-input { flex: 1; background: #2a3942; border: none; border-radius: 24px; padding: 10px 16px; color: white; font-size: 14px; outline: none; }
@@ -54,6 +55,11 @@
         .config-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
         .config-btn-save { background: #00a884; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: 500; cursor: pointer; }
         .config-btn-cancel { background: #3b4a54; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: 500; cursor: pointer; }
+        /* Botón de finalizar soporte */
+        .soporte-footer { padding: 12px 16px; border-top: 1px solid #2a3942; background: #202c33; display: flex; justify-content: center; }
+        .btn-finalizar { background: #f0b400; border: none; color: #000; padding: 8px 16px; border-radius: 20px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .btn-finalizar:hover { background: #ffc107; }
+        .btn-finalizar:disabled { opacity: 0.5; cursor: not-allowed; background: #3b4a54; color: #8696a0; }
         @media (max-width: 768px) {
             .app-container { flex-direction: column; }
             .chat-list { width: 100%; height: 100%; display: flex; }
@@ -65,10 +71,10 @@
 </head>
 <body>
     <div class="app-container" id="appContainer">
-        <!-- Lista de chats con buscador -->
+        <!-- Lista de chats -->
         <div class="chat-list" id="chatList">
             <div class="chat-list-header">
-                <input type="text" id="searchInput" placeholder="Buscar...">
+                <input type="text" id="searchInput" placeholder="Buscar por nombre o número...">
                 <button class="config-btn" id="configButton">⚙️</button>
             </div>
             <div class="chat-list-items" id="chatListItems">
@@ -76,18 +82,22 @@
             </div>
         </div>
 
-        <!-- Ventana de chat -->
+        <!-- Ventana de chat activa -->
         <div class="chat-window" id="chatWindow">
             <div class="chat-header">
                 <button class="back-button" id="backButton">←</button>
                 <div class="header-avatar" id="currentAvatar">K</div>
                 <div class="header-info">
                     <h2 id="currentName">Selecciona un chat</h2>
-                    <p id="currentStatus">Selecciona un contacto</p>
+                    <p id="currentStatus">Selecciona un contacto para ver los mensajes</p>
                 </div>
             </div>
             <div class="messages-area" id="messagesArea">
-                <div class="loading">Selecciona un chat</div>
+                <div class="loading">Selecciona un chat para comenzar</div>
+            </div>
+            <!-- Área del botón de finalizar soporte (solo visible cuando soporte está activo) -->
+            <div class="soporte-footer" id="soporteFooter" style="display: none;">
+                <button class="btn-finalizar" id="finalizarSoporteBtn">Finalizar soporte</button>
             </div>
             <div class="message-input-area" id="messageInputArea" style="display: none;">
                 <input type="text" class="message-input" id="messageInput" placeholder="Escribe un mensaje...">
@@ -109,7 +119,7 @@
                 <input type="text" id="phoneIdInput" placeholder="Ej: 987843211079314">
             </div>
             <div class="config-field">
-                <label>URL de n8n (guardar mensajes)</label>
+                <label>URL de n8n (para guardar mensajes y soporte)</label>
                 <input type="text" id="scriptUrlInput" placeholder="https://tu-n8n.com/webhook/...">
             </div>
             <div class="config-actions">
@@ -123,15 +133,14 @@
         // Configuración de Google Sheets (solo lectura)
         const API_KEY = 'AIzaSyB_0k0-eyJjkobM_01BVqV9ZGvqk3DFrbk';
         const SPREADSHEET_ID = '18ajgNOvm6ZiyJFkmbcLGJWCrGUpTIVaVoz_9kQJrK48';
-        const RANGE = 'Hoja1';
+        const RANGE = 'DATOS SUPERLAB';
 
         // Estado global
-        let contacts = []; // { numero, nombre, mensajes, ultimoMensaje, inicial, ultimaFecha }
+        let contacts = []; // cada contacto: { numero, nombre, mensajes, ultimoMensaje, ultimaFecha, inicial, soporte }
         let currentContact = null;
         let whatsappToken = localStorage.getItem('whatsapp_token') || '';
         let phoneNumberId = localStorage.getItem('phone_number_id') || '';
-        let n8nUrl = localStorage.getItem('n8n_url') || '';
-        let pollingInterval = null;
+        let n8nUrl = localStorage.getItem('n8n_url') || ''; // URL del webhook de n8n para guardar
 
         // Elementos DOM
         const chatListItems = document.getElementById('chatListItems');
@@ -151,74 +160,84 @@
         const scriptUrlInput = document.getElementById('scriptUrlInput');
         const cancelConfig = document.getElementById('cancelConfig');
         const saveConfig = document.getElementById('saveConfig');
+        const soporteFooter = document.getElementById('soporteFooter');
+        const finalizarBtn = document.getElementById('finalizarSoporteBtn');
         const searchInput = document.getElementById('searchInput');
 
-        // Inicializar inputs
+        // Inicializar inputs de configuración
         tokenInput.value = whatsappToken;
         phoneIdInput.value = phoneNumberId;
         scriptUrlInput.value = n8nUrl;
 
-        // Utilidades
+        // Función para normalizar número
         const normalizarNumero = (num) => String(num).replace(/\D/g, '');
-        const splitMessages = (text) => text ? text.split('||').map(s => s.trim()).filter(Boolean) : [];
 
-        // Función para parsear fecha (por si acaso)
-        function parseCustomDate(dateStr) {
-            if (!dateStr) return null;
-            try {
-                const parts = dateStr.split(', ');
-                if (parts.length < 2) return null;
-                const datePart = parts[0];
-                const timePart = parts[1];
-                const [day, month, year] = datePart.split('/').map(Number);
-                let [time, modifier] = timePart.split(' ');
-                let [hours, minutes, seconds] = time.split(':').map(Number);
-                if (modifier === 'p.m.' && hours !== 12) hours += 12;
-                if (modifier === 'a.m.' && hours === 12) hours = 0;
-                return new Date(year, month - 1, day, hours, minutes, seconds || 0);
-            } catch (e) {
-                return null;
-            }
+        // Dividir mensajes usando "||"
+        function splitMessages(text) {
+            if (!text) return [];
+            return text.split('||').map(s => s.trim()).filter(Boolean);
         }
 
-        // Cargar datos desde Sheets
+        // Cargar datos desde Google Sheets
         async function loadData() {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+            
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                if (!data.values || data.values.length < 2) throw new Error('No hay datos');
+                
+                if (!data.values || data.values.length < 2) {
+                    throw new Error('No se encontraron datos');
+                }
 
-                const rows = data.values.slice(1); // sin cabeceras
+                const rows = data.values;
+                const headers = rows[0]; // Cabeceras
+                const dataRows = rows.slice(1); // Filas de datos, la primera es la más reciente
+
+                // Mapa de contactos: key = número normalizado
                 const contactMap = new Map();
 
-                // Recorrer de abajo arriba (antiguo a reciente)
-                for (let i = rows.length - 1; i >= 0; i--) {
-                    const row = rows[i];
-                    while (row.length < 5) row.push('');
-                    let [numero, nombre, botMsg, humanoMsg, fechaStr] = row;
-                    if (!numero || numero.trim() === '') continue;
+                // Procesar filas de la más antigua a la más reciente (de abajo arriba)
+                for (let i = dataRows.length - 1; i >= 0; i--) {
+                    const row = dataRows[i];
+                    while (row.length < 6) row.push(''); // Aseguramos 6 columnas: ahora hay soporte
+                    
+                    let [numero, nombre, botMsg, humanoMsg, fechaStr, soporte] = row;
+                    if (!numero || numero.trim() === '') continue; // Saltar filas sin número
 
                     const numeroNorm = normalizarNumero(numero);
                     const nombreContacto = nombre ? nombre.trim() : 'Usuario';
 
+                    // Obtener o crear entrada en el mapa
                     if (!contactMap.has(numeroNorm)) {
                         contactMap.set(numeroNorm, {
                             numero: numero,
                             nombre: nombreContacto,
-                            mensajes: [],
+                            mensajes: [], // array de objetos { texto, tipo } en orden cronológico
                             ultimoMensaje: '',
-                            ultimaFecha: parseCustomDate(fechaStr),
-                            inicial: nombreContacto[0].toUpperCase()
+                            ultimaFecha: null,
+                            inicial: nombreContacto[0].toUpperCase(),
+                            soporte: soporte ? soporte.trim().toLowerCase() : '' // Guardar estado de soporte
                         });
                     }
                     const contacto = contactMap.get(numeroNorm);
 
+                    // Actualizar soporte con el valor de la fila más reciente (la primera que encontramos para este contacto)
+                    // Como recorremos de abajo arriba, la última fila (la más reciente) será la que tenga el soporte más actualizado.
+                    // Pero podemos sobrescribir cada vez; al final quedará el de la fila más reciente (i más bajo)
+                    if (soporte && soporte.trim() !== '') {
+                        contacto.soporte = soporte.trim().toLowerCase();
+                    }
+
+                    // Procesar mensajes de humano y bot
                     const mensajesHumano = splitMessages(humanoMsg);
                     const mensajesBot = splitMessages(botMsg);
+
+                    // Invertir cada array para que el más antiguo quede primero
                     mensajesHumano.reverse();
                     mensajesBot.reverse();
 
+                    // Intercalar: humano, bot, humano, bot...
                     const maxLen = Math.max(mensajesHumano.length, mensajesBot.length);
                     for (let j = 0; j < maxLen; j++) {
                         if (j < mensajesHumano.length) {
@@ -229,26 +248,33 @@
                         }
                     }
 
-                    // Último mensaje para la lista (el más reciente)
-                    const fechaFila = parseCustomDate(fechaStr);
-                    if (fechaFila && (!contacto.ultimaFecha || fechaFila > contacto.ultimaFecha)) {
-                        contacto.ultimaFecha = fechaFila;
-                        // Último mensaje de esta fila (el último agregado en la iteración)
-                        const ultimoDeFila = mensajesBot.length > 0 ? mensajesBot[mensajesBot.length-1] : (mensajesHumano.length > 0 ? mensajesHumano[mensajesHumano.length-1] : '');
-                        if (ultimoDeFila) contacto.ultimoMensaje = ultimoDeFila;
+                    // Actualizar último mensaje y fecha para la lista de chats (el más reciente de toda la conversación)
+                    if (fechaStr) {
+                        const fecha = new Date(fechaStr);
+                        if (!contacto.ultimaFecha || fecha > contacto.ultimaFecha) {
+                            contacto.ultimaFecha = fecha;
+                            // El último mensaje puede ser el último de la fila actual (el más reciente de esta fila)
+                            const ultimoDeFila = mensajesBot.length > 0 ? mensajesBot[mensajesBot.length-1] : (mensajesHumano.length > 0 ? mensajesHumano[mensajesHumano.length-1] : '');
+                            if (ultimoDeFila) contacto.ultimoMensaje = ultimoDeFila;
+                        }
                     }
                 }
 
+                // Convertir mapa a array y ordenar por última fecha (más reciente primero)
                 contacts = Array.from(contactMap.values());
                 contacts.sort((a, b) => {
                     if (a.ultimaFecha && b.ultimaFecha) return b.ultimaFecha - a.ultimaFecha;
                     return 0;
                 });
 
-                // Refrescar la lista de chats
-                renderChatList();
+                // Aplicar filtro de búsqueda si hay texto
+                if (searchInput.value.trim() !== '') {
+                    filterChats(searchInput.value.trim().toLowerCase());
+                } else {
+                    renderChatList(contacts);
+                }
 
-                // Si hay un contacto seleccionado, actualizarlo
+                // Si hay un contacto seleccionado, actualizarlo y re-renderizar mensajes
                 if (currentContact) {
                     const updated = contacts.find(c => c.numero === currentContact.numero);
                     if (updated) {
@@ -257,76 +283,73 @@
                     } else {
                         currentContact = null;
                         messagesArea.innerHTML = '<div class="loading">Selecciona un chat</div>';
-                        messageInputArea.style.display = 'none';
+                        soporteFooter.style.display = 'none';
                     }
                 }
             } catch (error) {
-                console.error('Error cargando datos:', error);
-                chatListItems.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+                console.error('Error:', error);
+                chatListItems.innerHTML = `<div class="loading">Error al cargar: ${error.message}</div>`;
             }
         }
 
-        // Renderizar lista de chats (con filtro opcional)
-        function renderChatList(filteredList = null) {
-            const list = filteredList || contacts;
+        // Filtrar chats según término de búsqueda
+        function filterChats(term) {
+            const filtered = contacts.filter(c => 
+                c.nombre.toLowerCase().includes(term) || 
+                c.numero.includes(term)
+            );
+            renderChatList(filtered);
+        }
+
+        // Renderizar la lista de chats (acepta lista personalizada para filtrado)
+        function renderChatList(list) {
             if (list.length === 0) {
                 chatListItems.innerHTML = '<div class="loading">No hay contactos</div>';
                 return;
             }
-            chatListItems.innerHTML = list.map(contact => `
+
+            chatListItems.innerHTML = list.map(contact => {
+                const soporteBadge = contact.soporte === 'si' ? '<span class="soporte-badge">Soporte</span>' : '';
+                return `
                 <div class="chat-item" data-numero="${contact.numero}">
                     <div class="chat-avatar">${contact.inicial}</div>
                     <div class="chat-info">
-                        <div class="chat-name">${contact.nombre} (${contact.numero})</div>
+                        <div class="chat-name">${contact.nombre} (${contact.numero}) ${soporteBadge}</div>
                         <div class="chat-last-msg">${contact.ultimoMensaje.substring(0, 30)}${contact.ultimoMensaje.length > 30 ? '...' : ''}</div>
                     </div>
                     <div class="chat-time">${contact.ultimaFecha ? contact.ultimaFecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''}</div>
                 </div>
-            `).join('');
+            `}).join('');
 
-            // Reasignar eventos
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const numero = item.dataset.numero;
                     selectContact(numero);
                 });
             });
-
-            // Mantener selección si existe
-            if (currentContact) {
-                document.querySelectorAll('.chat-item').forEach(item => {
-                    if (item.dataset.numero === currentContact.numero) {
-                        item.classList.add('selected');
-                    }
-                });
-            }
         }
 
-        // Buscar contactos
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = contacts.filter(c => 
-                c.nombre.toLowerCase().includes(term) || 
-                c.numero.includes(term)
-            );
-            renderChatList(filtered);
-        });
-
-        // Seleccionar un contacto
         function selectContact(numero) {
-            const contact = contacts.find(c => c.numero === numero);
-            if (!contact) return;
-            currentContact = contact;
+            currentContact = contacts.find(c => c.numero === numero);
+            if (!currentContact) return;
 
-            // Marcar selección visual
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.classList.remove('selected');
-                if (item.dataset.numero === numero) item.classList.add('selected');
+                if (item.dataset.numero === numero) {
+                    item.classList.add('selected');
+                }
             });
 
-            currentName.textContent = `${contact.nombre} (${contact.numero})`;
+            currentName.innerHTML = `${currentContact.nombre} (${currentContact.numero}) ${currentContact.soporte === 'si' ? '<span class="soporte-badge">Soporte</span>' : ''}`;
             currentStatus.textContent = 'en línea';
-            currentAvatar.textContent = contact.inicial;
+            currentAvatar.textContent = currentContact.inicial;
+
+            // Mostrar/ocultar botón de finalizar soporte según el estado
+            if (currentContact.soporte === 'si') {
+                soporteFooter.style.display = 'flex';
+            } else {
+                soporteFooter.style.display = 'none';
+            }
 
             if (window.innerWidth <= 768) {
                 chatWindow.classList.add('active');
@@ -334,8 +357,8 @@
             }
 
             renderMessages();
-
-            // Mostrar input si hay credenciales
+            
+            // Mostrar área de envío si hay token y phone ID
             if (whatsappToken && phoneNumberId) {
                 messageInputArea.style.display = 'flex';
                 sendButton.disabled = false;
@@ -344,45 +367,95 @@
             }
         }
 
-        // Renderizar mensajes del contacto actual
         function renderMessages() {
             if (!currentContact) return;
+
             messagesArea.innerHTML = '';
+
             if (currentContact.mensajes.length === 0) {
                 messagesArea.innerHTML = '<div class="loading">No hay mensajes</div>';
                 return;
             }
+
+            // Los mensajes ya están en orden cronológico (antiguo a reciente)
             currentContact.mensajes.forEach(msg => {
-                const row = document.createElement('div');
-                row.className = 'message-row';
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'message-row';
+
                 const bubble = document.createElement('div');
                 bubble.className = `message-bubble ${msg.tipo === 'humano' ? 'incoming' : 'outgoing'}`;
                 bubble.textContent = msg.texto;
+
                 const meta = document.createElement('div');
                 meta.className = 'message-meta';
-                meta.textContent = msg.tipo === 'humano' ? 'usuario' : 'bot';
-                row.appendChild(bubble);
-                row.appendChild(meta);
-                messagesArea.appendChild(row);
+                meta.textContent = msg.tipo === 'humano' ? '👤' : '🤖';
+
+                rowDiv.appendChild(bubble);
+                rowDiv.appendChild(meta);
+                messagesArea.appendChild(rowDiv);
             });
+
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        // Guardar en n8n
+        // Guardar mensaje en n8n (para actualizar Google Sheets)
         async function saveToN8n(numero, nombre, texto) {
-            if (!n8nUrl) return;
+            if (!n8nUrl) {
+                console.log('No se ha configurado URL de n8n. No se guardará en Sheets.');
+                return;
+            }
             try {
-                await fetch(n8nUrl, {
+                const response = await fetch(n8nUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ numero, nombre, texto })
                 });
+                const data = await response.json();
+                console.log('Respuesta de n8n:', data);
             } catch (error) {
-                console.error('Error guardando en n8n:', error);
+                console.error('Error al guardar en n8n:', error);
             }
         }
 
-        // Enviar mensaje
+        // Finalizar soporte: actualizar la columna soporte a "no" (o vacío) vía n8n
+        async function finalizarSoporte() {
+            if (!currentContact || !n8nUrl) return;
+
+            // Mostrar confirmación
+            if (!confirm('¿Estás seguro de finalizar el soporte para este contacto?')) return;
+
+            try {
+                const response = await fetch(n8nUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        numero: currentContact.numero,
+                        nombre: currentContact.nombre,
+                        accion: 'finalizar_soporte' // Indicamos que es una acción especial
+                    })
+                });
+                const data = await response.json();
+                console.log('Soporte finalizado:', data);
+
+                // Actualizar localmente el estado del contacto
+                currentContact.soporte = '';
+                // Actualizar también en la lista contacts
+                const idx = contacts.findIndex(c => c.numero === currentContact.numero);
+                if (idx !== -1) contacts[idx].soporte = '';
+                
+                // Ocultar botón
+                soporteFooter.style.display = 'none';
+                // Actualizar el badge en el header
+                currentName.innerHTML = `${currentContact.nombre} (${currentContact.numero})`;
+                // Opcional: recargar datos para asegurar consistencia
+                await refreshData();
+            } catch (error) {
+                console.error('Error al finalizar soporte:', error);
+                alert('Error al finalizar soporte');
+            }
+        }
+
+        // Enviar mensaje desde el bot (nuestra interfaz)
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text || !currentContact || !whatsappToken || !phoneNumberId) return;
@@ -390,15 +463,22 @@
             const to = currentContact.numero;
             const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
 
-            // Mostrar optimistamente
+            const payload = {
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                to: to,
+                type: 'text',
+                text: { preview_url: false, body: text }
+            };
+
+            // Mostrar mensaje optimistamente en la interfaz
             currentContact.mensajes.push({ texto: text, tipo: 'bot' });
             renderMessages();
             messageInput.value = '';
 
-            // Guardar en n8n (dispara actualización en Sheets)
+            // Guardar en Google Sheets vía n8n (como mensaje de bot)
             await saveToN8n(to, currentContact.nombre, text);
 
-            // Enviar a WhatsApp
             try {
                 const response = await fetch(url, {
                     method: 'POST',
@@ -406,23 +486,50 @@
                         'Authorization': `Bearer ${whatsappToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        messaging_product: 'whatsapp',
-                        to: to,
-                        type: 'text',
-                        text: { body: text }
-                    })
+                    body: JSON.stringify(payload)
                 });
+
                 if (!response.ok) {
-                    const err = await response.json();
-                    console.error('Error WhatsApp:', err);
+                    const errorData = await response.json();
+                    console.error('Error al enviar mensaje:', errorData);
+                    alert('Error al enviar mensaje. Revisa la consola.');
+                } else {
+                    console.log('Mensaje enviado correctamente');
                 }
             } catch (error) {
-                console.error('Error red:', error);
+                console.error('Error de red:', error);
+                alert('Error de red al enviar mensaje.');
             }
         }
 
-        // Eventos de UI
+        // Polling: actualizar datos cada 5 segundos
+        let pollingInterval = null;
+
+        async function refreshData() {
+            console.log('Actualizando datos...');
+            await loadData();
+        }
+
+        // Iniciar polling después de la carga inicial
+        loadData().then(() => {
+            pollingInterval = setInterval(refreshData, 5000);
+        });
+
+        // Detener polling cuando la pestaña no está visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+            } else {
+                if (!pollingInterval) {
+                    pollingInterval = setInterval(refreshData, 5000);
+                }
+            }
+        });
+
+        // Event listeners
         backButton.addEventListener('click', () => {
             chatWindow.classList.remove('active');
             document.getElementById('chatList').style.display = 'flex';
@@ -433,10 +540,26 @@
             if (e.key === 'Enter') sendMessage();
         });
 
-        // Configuración
-        configButton.addEventListener('click', () => configPanel.classList.add('active'));
+        finalizarBtn.addEventListener('click', finalizarSoporte);
 
-        cancelConfig.addEventListener('click', () => configPanel.classList.remove('active'));
+        // Búsqueda en tiempo real
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            if (term === '') {
+                renderChatList(contacts);
+            } else {
+                filterChats(term);
+            }
+        });
+
+        // Configuración
+        configButton.addEventListener('click', () => {
+            configPanel.classList.add('active');
+        });
+
+        cancelConfig.addEventListener('click', () => {
+            configPanel.classList.remove('active');
+        });
 
         saveConfig.addEventListener('click', () => {
             whatsappToken = tokenInput.value.trim();
@@ -455,33 +578,10 @@
             }
         });
 
-        // Cerrar panel con clic fuera
+        // Cerrar panel si se hace clic fuera
         window.addEventListener('click', (e) => {
-            if (e.target === configPanel) configPanel.classList.remove('active');
-        });
-
-        // Polling automático cada 5 segundos
-        async function refreshData() {
-            console.log('Refrescando datos...');
-            await loadData();
-        }
-
-        // Iniciar carga y luego polling
-        loadData().then(() => {
-            pollingInterval = setInterval(refreshData, 5000);
-        });
-
-        // Pausar polling cuando la pestaña no está visible
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
-                }
-            } else {
-                if (!pollingInterval) {
-                    pollingInterval = setInterval(refreshData, 5000);
-                }
+            if (e.target === configPanel) {
+                configPanel.classList.remove('active');
             }
         });
 
